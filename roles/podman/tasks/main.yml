@@ -1,0 +1,15 @@
+---
+- name: Ensure podman is installed.
+  become: true
+  ansible.builtin.package:
+    name: podman
+    state: present
+
+- name: Ensure lingering is enable for user.
+  become: true
+  command:
+    cmd: "loginctl enable-linger {{ ansible_user }}"
+    ##{{ item.name }}"
+    creates: "/var/lib/systemd/linger/{{ ansible_user }}"
+##  with_items:
+##    - "{{ ansible_user }}"
