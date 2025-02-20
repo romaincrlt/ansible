@@ -1,0 +1,8 @@
+---
+- name: yum-clean-metadata
+  become: true
+  ansible.builtin.command: dnf clean metadata
+
+- name: reboot-system
+  become: true
+  ansible.builtin.reboot:

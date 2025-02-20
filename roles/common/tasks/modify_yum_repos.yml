@@ -1,0 +1,31 @@
+---
+- name: Modify baseos repository (and clean up left-over metadata)
+  become: true
+  ansible.builtin.yum_repository:
+    name: baseos
+    description: AlmaLinux 9.5 - BaseOS
+    file: almalinux-baseos
+    state: present
+    baseurl: "{{ baseos_url }}"
+  notify: yum-clean-metadata
+
+- name: Modify appstream repository (and clean up left-over metadata)
+  become: true
+  ansible.builtin.yum_repository:
+    name: appstream
+    description: AlmaLinux 9.5 - AppStream
+    file: almalinux-appstream
+    state: present
+    baseurl: "{{ appstream_url }}"
+  notify: yum-clean-metadata
+
+- name: Remove extras repository (and clean up left-over metadata)
+  become: true
+  ansible.builtin.yum_repository:
+    name: extras
+    description: AlmaLinux 9.5 - Extras
+    file: almalinux-extras
+    #state: absent
+    enabled: no
+    baseurl: ""
+  notify: yum-clean-metadata
