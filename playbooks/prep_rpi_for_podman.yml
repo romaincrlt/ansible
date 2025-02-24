@@ -1,0 +1,38 @@
+---
+- name: Setup OS
+  hosts: rpi51
+  tasks:
+    - name: Update OS (Reboot machine if needed)
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: update_os
+
+    - name: Install packages
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: install_packages
+
+- name: Setup Podman
+  hosts: rpi51
+  #become: true
+  tasks:
+    - name: Setup Podman
+      ansible.builtin.import_role:
+        name: roles/podman
+
+    - name: Enable Podman restart
+      ansible.builtin.import_role:
+        name: roles/podman
+        tasks_from: podman_restart
+
+#    - name: Get service facts
+#      ansible.builtin.service_facts:
+#      become: true
+
+- name: Prep storage
+  hosts: rpi51
+  tasks:
+    - name: Permanently mount external HDD
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: mount_drive
