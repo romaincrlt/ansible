@@ -1,0 +1,7 @@
+---
+- name: restart systemd-logind
+  ansible.builtin.systemd:
+    name: systemd-logind.service
+    scope: system
+    state: restarted
+    daemon_reload: true

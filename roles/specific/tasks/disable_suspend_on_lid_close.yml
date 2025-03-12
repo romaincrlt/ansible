@@ -1,0 +1,24 @@
+# sudo loginctl set-property --persistent HandleLidSwitch ignore
+
+#- name: Disable suspend on laptop lid close
+#  lineinfile:
+#    path: "/etc/systemd/logind.conf"
+#    state: present
+#    regexp: "^HandleLidSwitch="
+#    line: "HandleLidSwitch=ignore"
+
+- name: Create systemd logind.conf.d
+  ansible.builtin.file:
+    path: /etc/systemd/logind.conf.d
+    state: directory
+    mode: "0755"
+
+- name: Modify logind configuration
+  copy:
+    content: |
+      HandleLidSwitch=ignore
+    dest: "/etc/systemd/logind.conf.d/lidswitch.conf"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  notify: restart systemd-logind
