@@ -1,0 +1,8 @@
+---
+- name: Enable podman restart service for user.
+  # When not use with systemd to manage containers
+  systemd:
+    state: started
+    name: podman-restart
+    enabled: yes
+    scope: user
