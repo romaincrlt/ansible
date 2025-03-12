@@ -1,0 +1,8 @@
+---
+- name: Disable Firewall
+  ansible.builtin.systemd_service:
+    name: firewalld.service
+    scope: system
+    state: stopped
+    enabled: false
+    daemon_reload: true
