@@ -1,0 +1,57 @@
+---
+- name: Prep OS
+  hosts: all
+  become: true
+  tasks:
+    - name: Update OS (Reboot machine if needed)
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: update_os
+
+    - name: Install packages
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: install_packages
+
+    - name: Disable firewall (server is in local network)
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: disable_firewall
+
+- name: Enable automatic updates
+  hosts: all
+  become: true
+  tasks:
+    - name: Enable automatic updates
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: automatic_updates
+
+- name: Disable suspend on lid close for laptop
+  hosts: laptop
+  become: true
+  tasks:
+    - name: Disable suspend on lid close
+      ansible.builtin.import_role:
+        name: specific
+        tasks_from: disable_suspend_on_lid_close
+
+- name: Ensure external drive is mounted on primary server
+  hosts: k8s_cp[0]
+  become: true
+  tasks:
+    - name: Mount External Drive
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: mount_drive
+      #when: inventory_hostname == groups[k8s_cp][0]
+
+- name: Download and execute k3s install script
+  hosts: k8s_cp[0]
+  become: true
+  tasks:
+    - name: Download and execute k3s install script on primary control plane
+      ansible.builtin.import_role:
+        name: k3s
+        #tasks_from: install_k3s_manually
+      when: inventory_hostname == groups["k8s_cp"][0]
