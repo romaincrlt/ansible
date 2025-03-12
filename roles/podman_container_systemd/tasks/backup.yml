@@ -1,0 +1,30 @@
+---
+# Need to be adapted
+- name: Verify backup dir
+  ansible.builtin.stat:
+    path: "/data/containers"
+  register: backup_dir_stat
+
+- name: Print a debug message
+  ansible.builtin.debug:
+    msg: "Backup dir not found"
+  when: not backup_dir_stat.stat.exists
+
+- block:
+    - name: Stop container before backup
+      ansible.builtin.systemd:
+        name: "{{ container_name }}.service"
+        state: stopped
+        scope: user
+
+    - name: Backup Podman Volume
+      containers.podman.podman_export:
+        volume: "{{ container_volume }}"
+        dest: "/data/containers/{{ container_volume }}.tar"
+
+    - name: Start container after backup
+      ansible.builtin.systemd:
+        name: "{{ container_name }}.service"
+        state: started
+        scope: user
+  when: backup_dir_stat.stat.exists

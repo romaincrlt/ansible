@@ -1,0 +1,46 @@
+---
+- name: Ensure {{ container_name }} image is present
+  containers.podman.podman_image:
+    name: "{{ container_image_source }}"
+    tag: "{{ container_image_version }}"
+    state: present
+
+- name: Ensure {{ container_name }} container is configure (quadlet)
+  when: ansible_facts['os_family'] == "RedHat"
+  notify: Restart service
+  containers.podman.podman_container:
+    name: "{{ container_name }}"
+    image: "{{ container_image_source }}:{{ container_image_version }}"
+    state: quadlet
+    quadlet_filename: "{{ container_name }}"
+    quadlet_options:
+      #- "AutoUpdate=registry"
+      #- "Pull=newer"
+      - |
+        [Install]
+        WantedBy=default.target
+    #restart_policy: always
+    ports: "{{ container_ports }}"
+    volumes: "{{ container_volumes }}"
+    env: "{{ container_env }}"
+
+- name: Ensure {{ container_name }} container is configure (old systemd version)
+  when: ansible_facts['os_family'] == "Debian"
+  notify: Restart service
+  block:
+    - name: Create container
+      containers.podman.podman_container:
+        name: "{{ container_name }}"
+        image: "{{ container_image_source }}:{{ container_image_version }}"
+        ports: "{{ container_ports }}"
+        volumes: "{{ container_volumes }}"
+        env: "{{ container_env }}"
+        rm: true
+        state: created
+
+    - name: Generate systemd unit file for container
+      containers.podman.podman_generate_systemd:
+        name: "{{ container_name }}"
+        new: true
+        no_header: true
+        dest: ~/.config/systemd/user/

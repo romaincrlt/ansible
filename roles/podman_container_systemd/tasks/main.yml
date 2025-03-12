@@ -1,0 +1,9 @@
+---
+- name: Configure container
+  ansible.builtin.include_tasks: container.yml
+
+- name: Ensure container is enabled and started
+  ansible.builtin.include_tasks: systemd.yml
+
+- name: Add firewalld rules
+  ansible.builtin.include_tasks: firewalld.yml
