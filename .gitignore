@@ -1,2 +1,3 @@
 inventory/
+inventories/
 playbooks/*_dev.yml
