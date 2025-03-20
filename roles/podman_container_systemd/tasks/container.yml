@@ -41,6 +41,7 @@
     - name: Generate systemd unit file for container
       containers.podman.podman_generate_systemd:
         name: "{{ container_name }}"
+        container_prefix: ""
         new: true
         no_header: true
         dest: ~/.config/systemd/user/
