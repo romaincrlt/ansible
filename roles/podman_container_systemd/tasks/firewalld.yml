@@ -5,12 +5,13 @@
 
 - name: Manage {{ container_name }} container firewalld port
   ansible.posix.firewalld:
-    port: "{{ container_port_on_host }}/tcp"
+    port: "{{ container_firewall_port }}"
     permanent: true
     state: enabled
     immediate: true
     #zone:
   become: true
   when:
-    - ansible_facts.services.get('firewalld.service', {}) | length
+    - "'firewalld.service' in ansible_facts.services"
     - ansible_facts.services['firewalld.service']['status'] == 'enabled'
+    - container_firewall_port != ""
