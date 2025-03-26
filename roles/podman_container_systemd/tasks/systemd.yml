@@ -1,7 +1,7 @@
 ---
-- name: Ensure {{ container_name }} container is running
+- name: Ensure {{ container_config.name }} container is running
   ansible.builtin.systemd:
-    name: "{{ container_name }}.service"
+    name: "{{ container_config.name }}.service"
     state: started
     enabled: true
     scope: user

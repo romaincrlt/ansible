@@ -1,18 +1,18 @@
 ---
-- name: Ensure {{ container_name }} image is present
+- name: Ensure {{ container_config.name }} image is present
   containers.podman.podman_image:
-    name: "{{ container_image_source }}"
-    tag: "{{ container_image_version }}"
+    name: "{{ container_config.image_name }}"
+    tag: "{{ container_config.image_tag }}"
     state: present
 
-- name: Ensure {{ container_name }} container is configure (quadlet)
+- name: Ensure {{ container_config.name }} container is configure (quadlet)
   when: ansible_facts['os_family'] == "RedHat"
   notify: Restart service
   containers.podman.podman_container:
-    name: "{{ container_name }}"
-    image: "{{ container_image_source }}:{{ container_image_version }}"
+    name: "{{ container_config.name }}"
+    image: "{{ container_config.image_name }}:{{ container_config.image_tag }}"
     state: quadlet
-    quadlet_filename: "{{ container_name }}"
+    quadlet_filename: "{{ container_config.name }}"
     quadlet_options:
       #- "AutoUpdate=registry"
       #- "Pull=newer"
@@ -20,27 +20,27 @@
         [Install]
         WantedBy=default.target
     #restart_policy: always
-    ports: "{{ container_ports }}"
-    volumes: "{{ container_volumes }}"
-    env: "{{ container_env }}"
+    ports: "{{ container_config.ports | default(omit) }}"
+    volumes: "{{ container_config.volumes | default(omit) }}"
+    env: "{{ container_config.env | default(omit) }}"
 
-- name: Ensure {{ container_name }} container is configure (old systemd version)
+- name: Ensure {{ container_config.name }} container is configure (old systemd version)
   when: ansible_facts['os_family'] == "Debian"
   notify: Restart service
   block:
     - name: Create container
       containers.podman.podman_container:
-        name: "{{ container_name }}"
-        image: "{{ container_image_source }}:{{ container_image_version }}"
-        ports: "{{ container_ports }}"
-        volumes: "{{ container_volumes }}"
-        env: "{{ container_env }}"
+        name: "{{ container_config.name }}"
+        image: "{{ container_config.image_name }}:{{ container_config.image_tag }}"
+        ports: "{{ container_config.ports | default(omit) }}"
+        volumes: "{{ container_config.volumes | default(omit) }}"
+        env: "{{ container_config.env | default(omit) }}"
         rm: true
         state: created
 
     - name: Generate systemd unit file for container
       containers.podman.podman_generate_systemd:
-        name: "{{ container_name }}"
+        name: "{{ container_config.name }}"
         container_prefix: ""
         new: true
         no_header: true

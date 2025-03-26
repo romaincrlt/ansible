@@ -3,9 +3,9 @@
   ansible.builtin.service_facts:
   become: true
 
-- name: Manage {{ container_name }} container firewalld port
+- name: Manage {{ container_config.name }} container firewalld port
   ansible.posix.firewalld:
-    port: "{{ container_firewall_port }}"
+    port: "{{ container_config.firewall_port }}"
     permanent: true
     state: enabled
     immediate: true

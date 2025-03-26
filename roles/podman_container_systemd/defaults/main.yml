@@ -1,0 +1,13 @@
+container_config: {}
+# Example
+# container_config:
+#   name: "" // required
+#   image_name: ""// required
+#   image_tag: // required
+#   ports: // required
+#     - "8080:80/tcp"
+#   firewall_port: "8080/tcp" // or ""
+#   volumes:
+#     - "volume_name:/path_on_container:Z"
+#   env:
+#     ENV_NAME: "value"
