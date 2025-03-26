@@ -1,0 +1,16 @@
+---
+- become: true
+  notify: Restart unattended-upgrades service
+  block:
+    - name: Install unattended-upgrades package
+      ansible.builtin.package:
+        name: unattended-upgrades
+        state: present
+
+    - name: Set config file to enable reboot
+      copy:
+        src: "files/52unattended-upgrades-local"
+        dest: "/etc/apt/apt.conf.d/52unattended-upgrades-local"
+        owner: "root"
+        group: "root"
+        mode: 0644
