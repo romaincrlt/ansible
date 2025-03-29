@@ -4,5 +4,7 @@ This role installs the `podman` package.
 
 It enables **linger** (via `loginctl`) for the **ansible_user**.
 
-The task `podman_restart` can be called to enable the `podman-restart` service for the **ansible_user**,
-to manage the pod lifecycle with a pod YAML definition.
+To enable the `podman-restart.service` for the **ansible_user**, set the variable `enable_podman_restart_service` to **true**.
+Do not activate it when managing containers with **systemd**.
+
+To enable the `podman.socket` for the **ansible_user**, set the variable `enable_podman_socket` to **true**.
