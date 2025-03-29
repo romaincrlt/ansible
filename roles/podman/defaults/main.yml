@@ -1,0 +1,5 @@
+podman_user: "{{ ansible_user }}"
+
+enable_podman_restart_service: false
+
+enable_podman_socket: false

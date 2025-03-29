@@ -13,3 +13,20 @@
     creates: "/var/lib/systemd/linger/{{ ansible_user }}"
 ##  with_items:
 ##    - "{{ ansible_user }}"
+
+- name: Enable podman restart service for user.
+  # When not use with systemd to manage containers
+  when: enable_podman_restart_service
+  systemd:
+    state: started
+    name: podman-restart.service
+    enabled: true
+    scope: user
+
+- name: Enable podman socket for user.
+  when: enable_podman_socket
+  systemd:
+    state: started
+    name: podman.socket
+    enabled: true
+    scope: user
