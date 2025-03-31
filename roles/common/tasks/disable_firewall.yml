@@ -1,8 +1,15 @@
 ---
+- name: Get service facts
+  ansible.builtin.service_facts:
+  become: true
+
 - name: Disable Firewall
+  become: true
   ansible.builtin.systemd_service:
     name: firewalld.service
     scope: system
     state: stopped
     enabled: false
     daemon_reload: true
+  when:
+    - "'firewalld.service' in ansible_facts.services"

@@ -1,0 +1,11 @@
+---
+- name: Install packages
+  import_tasks: install_packages.yml
+
+- name: Update all packages and reboot
+  import_tasks: update_all_packages.yml
+  when: update_all_packages
+
+- name: Disable Firewall
+  import_tasks: disable_firewall.yml
+  when: disable_firewall
