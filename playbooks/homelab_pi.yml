@@ -1,36 +1,25 @@
 ---
 - name: Enable automatic updates
   hosts: all
-  tasks:
-    - name: Enable automatic updates
-      ansible.builtin.import_role:
-        name: common
-        tasks_from: automatic_updates
+  vars:
+    packages_to_install:
+      - curl
+      - rsync
+      - vim
+    enable_podman_restart_service: true
+    enable_podman_socket: true
+  roles:
+    - role: common
+    - role: automatic_updates
+    - role: podman
 
 - name: Setup storage
   hosts: worker1
   tasks:
-    - name: Permanently mount external HDD
-      ansible.builtin.import_role:
-        name: common
-        tasks_from: mount_drive
-      vars:
-        label: "{{ worker1_drive_label }}"
+    - name: Ensure drive is mounted
+      become: true
+      ansible.posix.mount:
+        path: "{{ worker1_drive_mountpoint }}"
+        src: LABEL={{ worker1_drive_label }}
         fstype: "{{ worker1_drive_fstype }}"
-        mountpoint: "{{ worker1_drive_mountpoint }}"
-
-- name: Create containers with SystemD
-  hosts: worker1
-  tasks:
-    - name: Create containers
-      ansible.builtin.include_role:
-        name: podman_container_systemd
-      vars:
-        container_name: "{{ item.name }}"
-        container_image_source: "{{ item.image_source }}"
-        container_image_version: "{{ item.image_version }}"
-        container_ports: "{{ item.ports }}"
-        container_volumes: "{{ item.volumes }}"
-        container_env: "{{ item.env }}"
-        container_firewall_port: "{{ item.firewall_port }}"
-      loop: "{{ worker1_containers }}"
+        state: mounted
