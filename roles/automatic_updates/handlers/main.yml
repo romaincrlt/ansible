@@ -1,5 +1,6 @@
 ---
 - name: Restart unattended-upgrades service
+  become: true
   ansible.builtin.systemd:
     name: "unattended-upgrades.service"
     scope: system
