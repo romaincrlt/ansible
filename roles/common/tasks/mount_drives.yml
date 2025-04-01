@@ -1,0 +1,9 @@
+---
+- name: Ensure drives is mounted
+  become: true
+  ansible.posix.mount:
+    path: "{{ item.mountpoint }}"
+    src: "{{ item.src }}"
+    fstype: "{{ item.fstype }}"
+    state: mounted
+  loop: "{{ drives_to_mount }}"

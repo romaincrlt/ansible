@@ -9,3 +9,7 @@
 - name: Disable Firewall
   import_tasks: disable_firewall.yml
   when: disable_firewall
+
+- name: Mount drives
+  import_tasks: mount_drives.yml
+  when: drives_to_mount | length > 0

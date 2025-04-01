@@ -4,3 +4,5 @@ packages_to_install: []
 disable_firewall: false
 
 update_all_packages: false
+
+drives_to_mount: []
