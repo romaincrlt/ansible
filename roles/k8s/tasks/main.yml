@@ -4,3 +4,6 @@
 
 - name: Install and configure containerd
   import_tasks: containerd.yml
+
+- name: Install Kubernetes components
+  import_tasks: kube_components.yml

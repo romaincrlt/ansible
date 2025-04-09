@@ -1,0 +1,62 @@
+---
+- name: Install kubernetes (RedHat)
+  become: true
+  when: ansible_facts['os_family'] == "RedHat"
+  block:
+    - name: add kubernetes rpm repository
+      copy:
+        src: "files/{{ kubernetes_rpm_repo }}.txt"
+        dest: "/etc/yum.repos.d/kubernetes.repo"
+        owner: "root"
+        mode: 0644
+      when: ansible_facts['distribution'] == "CentOS"
+    - name: install kubernetes (rpm distro)
+      dnf:
+        enablerepo: kubernetes
+        update_cache: yes
+        name:
+          - kubeadm-{{ kube_version + '*' }}
+          - kubelet-{{ kube_version + '*' }}
+          - kubectl-{{ kube_version + '*' }}
+        state: present
+
+- name: Install kubernetes (Debian)
+  become: true
+  when: ansible_facts['os_family'] == "Debian"
+  block:
+    - name: get kubernetes apt key
+      get_url:
+        url: "{{ kubernetes_deb_repo_key }}"
+        dest: /etc/apt/keyrings/kubernetes-archive-keyring.asc
+
+    - name: add kubernetes apt repo
+      apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
+        filename: "kubernetes"
+        state: present
+
+    - name: install kubernetes (deb distro)
+      apt:
+        update_cache: yes
+        name:
+          - kubeadm={{ kube_version + '*' }}
+          - kubelet={{ kube_version + '*' }}
+          - kubectl={{ kube_version + '*' }}
+        state: present
+
+    - name: prevent kube package from being upgraded (deb distro)
+      dpkg_selections:
+        name: "{{ item }}"
+        selection: hold
+      with_items:
+        - kubeadm
+        - kubectl
+        - kubelet
+
+- name: Enable and start kubelet service
+  become: true
+  systemd:
+    state: started
+    daemon_reload: yes
+    name: kubelet
+    enabled: yes
