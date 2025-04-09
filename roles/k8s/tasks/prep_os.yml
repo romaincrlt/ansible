@@ -1,0 +1,59 @@
+---
+- name: Disable Swap
+  become: true
+  block:
+    - name: disable swap in fstab
+      mount:
+        name: "{{ item }}"
+        fstype: swap
+        state: absent
+      with_items:
+        - swap
+        - none
+
+    - name: check if swap active
+      command: /sbin/swapon --show
+      register: swapon
+      changed_when: no
+
+    - name: stop active swap
+      command: /sbin/swapoff -a
+      when: swapon.stdout
+
+- name: Configure networking
+  become: true
+  block:
+    - name: start br_netfilter and overlay modules
+      modprobe:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - br_netfilter
+        - overlay
+
+    - name: enable modules
+      copy:
+        dest: /etc/modules-load.d/kubernetes.conf
+        content: |
+          br_netfilter
+          overlay
+        mode: 0644
+
+    - name: enable sysctl network setting for kubernetes
+      sysctl:
+        name: "{{ item }}"
+        state: present
+        sysctl_file: "/etc/sysctl.d/kubernetes.conf"
+        value: "1"
+        reload: yes
+      with_items:
+        - net.bridge.bridge-nf-call-iptables
+        - net.bridge.bridge-nf-call-ip6tables
+        - net.ipv4.ip_forward
+
+- name: Set SELinux to permissive mode
+  become: true
+  selinux:
+    policy: targeted
+    state: permissive
+  when: ansible_facts['os_family'] == "RedHat"
