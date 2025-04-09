@@ -1,0 +1,27 @@
+---
+- name: check if node already init
+  become: true
+  stat:
+    path: "/var/lib/kubelet/config.yaml"
+    get_attributes: no
+    get_checksum: no
+    get_mime: no
+  register: node_already_init
+
+- name: generate join command
+  become: true
+  shell: kubeadm token create --print-join-command
+  register: kubeadm_join_command
+  delegate_to: "{{ first_control_plane }}"
+  when: not node_already_init.stat.exists
+
+- name: create join command
+  become: true
+  set_fact:
+    kubeadm_join: "{{ kubeadm_join_command.stdout }}"
+  when: not node_already_init.stat.exists
+
+- name: join worker node
+  become: true
+  shell: "{{ kubeadm_join }}"
+  when: not node_already_init.stat.exists

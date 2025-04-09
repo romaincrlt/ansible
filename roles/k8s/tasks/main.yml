@@ -11,3 +11,7 @@
 - name: Initialize control plane
   import_tasks: init_cp.yml
   when: inventory_hostname == groups["k8s_cp"][0]
+
+- name: Join nodes
+  import_tasks: join_nodes.yml
+  when: inventory_hostname == groups["kube_node"][0]
