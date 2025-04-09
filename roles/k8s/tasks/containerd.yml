@@ -1,0 +1,116 @@
+---
+- name: Install containerd (RedHat)
+  become: true
+  when: ansible_facts['os_family'] == "RedHat"
+  block:
+    - name: add docker rpm repository
+      copy:
+        src: "files/{{ docker_rpm_repo }}.txt"
+        dest: "/etc/yum.repos.d/docker.repo"
+        owner: "root"
+        mode: 0644
+
+    - name: install containerd (rpm)
+      dnf:
+        enablerepo: docker
+        update_cache: yes
+        name: containerd.io
+        state: present
+
+- name: Install containerd (Debian)
+  become: true
+  when: ansible_facts['os_family'] == "Debian"
+  block:
+    - name: add docker repository
+      block:
+        - name: get docker apt key
+          get_url:
+            url: "{{ docker_debian_gpg_key }}"
+            dest: /etc/apt/keyrings/docker-archive-keyring.asc
+        - name: add docker apt repo
+          apt_repository:
+            repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker-archive-keyring.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+            filename: "docker"
+            state: present
+
+    - name: install containerd (deb)
+      apt:
+        update_cache: yes
+        name: containerd.io
+        state: present
+
+- name: Configure containerd
+  become: true
+  block:
+    - name: get the default containerd config
+      shell: |
+        containerd config default | tee /tmp/containerd-config.toml
+      changed_when: false
+
+    - name: set SystemdCgroup to true in containerd config file
+      replace:
+        path: "/tmp/containerd-config.toml"
+        regexp: "SystemdCgroup = false"
+        replace: "SystemdCgroup = true"
+      changed_when: false
+
+    #- name: set config_path for registry in containerd config file
+    #  replace:
+    #    path: /etc/containerd/config.toml
+    #    regexp: 'config_path = ""'
+    #    replace: 'config_path = "/etc/containerd/certs.d"'
+
+    #- name: create containerd certs.d directory
+    #  file:
+    #    path: /etc/containerd/certs.d/{{ local_registry }}
+    #    state: directory
+    #    mode: 0755
+
+    #- name: create config for local registry
+    #  copy:
+    #    dest: "/etc/containerd/certs.d/{{ local_registry }}/hosts.toml"
+    #    content: |
+    #      server = "http://{{ local_registry }}:{{ local_registry_port }}"
+    #      [host."http://{{ local_registry }}:{{ local_registry_port }}"]
+    #        capabilities = ["pull", "resolve", "push"]
+    #        skip_verify = true
+    #    owner: "root"
+    #    mode: 0644
+
+    #- name: remove default docker containerd.io config file
+    #  file:
+    #    state: absent
+    #    path: "/etc/containerd/config.toml"
+    #  when: containerd_not_initialized
+
+    - name: check containerd config file new
+      copy:
+        src: "/tmp/containerd-config.toml"
+        dest: "/etc/containerd/config.toml"
+        remote_src: yes
+      check_mode: yes
+      diff: yes
+      register: containerd_config_differ
+
+    - name: replace
+      copy:
+        src: "/tmp/containerd-config.toml"
+        dest: "/etc/containerd/config.toml"
+        owner: "root"
+        mode: 0644
+        remote_src: yes
+      when: containerd_config_differ.changed
+
+    - name: clean /tmp/containerd-config.toml
+      file:
+        path: /tmp/containerd-config.toml
+        state: absent
+      changed_when: false
+
+    - name: restart containerd service
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: containerd
+        enabled: yes
+      when: containerd_config_differ.changed

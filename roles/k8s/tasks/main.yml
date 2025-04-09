@@ -1,3 +1,6 @@
 ---
 - name: Prep OS
   import_tasks: prep_os.yml
+
+- name: Install and configure containerd
+  import_tasks: containerd.yml
