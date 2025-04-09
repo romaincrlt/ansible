@@ -1,0 +1,24 @@
+---
+- name: add conf for kubeadm config file
+  become: true
+  template:
+    src: templates/kubeadm-config.yaml.j2
+    dest: "/home/{{ ansible_user }}/kubeadm-config.yaml"
+    owner: "{{ ansible_user }}"
+    mode: 0644
+
+- name: check if node already init
+  become: true
+  stat:
+    path: "/var/lib/kubelet/config.yaml"
+    get_attributes: no
+    get_checksum: no
+    get_mime: no
+  register: node_already_init
+
+- name: init control plane
+  become: true
+  shell: |
+    kubeadm init --config=/home/{{ ansible_user }}/kubeadm-config.yaml \
+    --upload-certs
+  when: not node_already_init.stat.exists
