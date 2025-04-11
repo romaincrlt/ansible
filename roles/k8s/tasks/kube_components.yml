@@ -4,20 +4,21 @@
   when: ansible_facts['os_family'] == "RedHat"
   block:
     - name: add kubernetes rpm repository
-      copy:
-        src: "files/{{ kubernetes_rpm_repo }}.txt"
+      template:
+        src: templates/kubernetes.repo.j2
         dest: "/etc/yum.repos.d/kubernetes.repo"
         owner: "root"
         mode: 0644
       when: ansible_facts['distribution'] == "CentOS"
+
     - name: install kubernetes (rpm distro)
       dnf:
-        enablerepo: kubernetes
+        disable_excludes: kubernetes
         update_cache: yes
         name:
-          - kubeadm-{{ kube_version + '*' }}
-          - kubelet-{{ kube_version + '*' }}
-          - kubectl-{{ kube_version + '*' }}
+          - kubeadm
+          - kubelet
+          - kubectl
         state: present
 
 - name: Install kubernetes (Debian)
@@ -26,12 +27,12 @@
   block:
     - name: get kubernetes apt key
       get_url:
-        url: "{{ kubernetes_deb_repo_key }}"
-        dest: /etc/apt/keyrings/kubernetes-archive-keyring.asc
+        url: "https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/deb/Release.key"
+        dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
 
     - name: add kubernetes apt repo
       apt_repository:
-        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/deb/ /"
         filename: "kubernetes"
         state: present
 
@@ -39,9 +40,9 @@
       apt:
         update_cache: yes
         name:
-          - kubeadm={{ kube_version + '*' }}
-          - kubelet={{ kube_version + '*' }}
-          - kubectl={{ kube_version + '*' }}
+          - kubeadm
+          - kubelet
+          - kubectl
         state: present
 
     - name: prevent kube package from being upgraded (deb distro)
