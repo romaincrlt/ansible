@@ -1,0 +1,24 @@
+---
+- name: check if calico manifest is present
+  stat:
+    path: "./calico.yaml"
+    get_attributes: no
+    get_checksum: no
+    get_mime: no
+  register: calico_manifests
+
+- name: download calico manifest
+  get_url:
+    url: "{{ calico_url }}"
+    dest: ./calico.yaml
+    mode: "0440"
+  when: not calico_manifests.stat.exists
+
+# chek if callico is already applied
+- name: apply pod network
+  #k8s: # necessite some others components
+  #  src: ./calico.yaml
+  #  state: present
+  #  apply: true
+  shell: kubectl apply -f calico.yaml
+  #when:

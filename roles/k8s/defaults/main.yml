@@ -1,2 +1,5 @@
 ---
 kubernetes_version: "v1.32"
+
+calico_version: "v3.29.1"
+calico_url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml"
