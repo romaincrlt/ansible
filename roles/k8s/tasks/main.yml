@@ -12,6 +12,10 @@
   import_tasks: init_cp.yml
   when: inventory_hostname == groups["k8s_cp"][0]
 
+- name: Configure user to use kubectl command
+  import_tasks: configure_user.yml
+  when: inventory_hostname == groups["k8s_cp"][0]
+
 - name: Setup CNI
   import_tasks: pod_network.yml
   when: inventory_hostname == groups["k8s_cp"][0]
