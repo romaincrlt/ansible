@@ -22,4 +22,4 @@
 
 - name: Join nodes
   import_tasks: join_nodes.yml
-  when: inventory_hostname == groups["kube_node"][0]
+  #when: inventory_hostname == groups["kube_node"][0]
