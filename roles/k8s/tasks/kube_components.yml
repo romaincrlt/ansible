@@ -9,7 +9,6 @@
         dest: "/etc/yum.repos.d/kubernetes.repo"
         owner: "root"
         mode: 0644
-      when: ansible_facts['distribution'] == "CentOS"
 
     - name: install kubernetes (rpm distro)
       dnf:
