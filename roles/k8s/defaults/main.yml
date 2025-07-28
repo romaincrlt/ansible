@@ -1,5 +1,8 @@
 ---
 kubernetes_version: "v1.32"
+kubernetes_version_full: "v1.32.7"
+
+pod_network_cidr: "172.16.0.0/16"
 
 calico_version: "v3.29.1"
 calico_url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml"
