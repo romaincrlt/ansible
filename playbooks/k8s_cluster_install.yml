@@ -2,12 +2,12 @@
 - name: Prep OS
   hosts: all
   vars:
-    packages_to_install:
-      - curl
-      - rsync
-      - vim
+    #packages_to_install:
+    #  - curl
+    #  - rsync
+    #  - vim
     disable_firewall: true
   roles:
     - role: common
-    - role: automatic_updates
+    #- role: automatic_updates
     - role: k8s
