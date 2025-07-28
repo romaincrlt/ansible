@@ -5,14 +5,14 @@
   block:
     - name: add docker rpm repository
       copy:
-        src: "files/{{ docker_rpm_repo }}.txt"
+        src: "files/docker-centos.repo.txt"
         dest: "/etc/yum.repos.d/docker.repo"
         owner: "root"
         mode: 0644
 
     - name: install containerd (rpm)
       dnf:
-        enablerepo: docker
+        #enablerepo: docker
         update_cache: yes
         name: containerd.io
         state: present
