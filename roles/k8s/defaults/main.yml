@@ -6,3 +6,5 @@ pod_network_cidr: "172.16.0.0/16"
 
 calico_version: "v3.30.2"
 calico_url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml"
+
+node_taint: []

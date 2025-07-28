@@ -1,0 +1,5 @@
+---
+- name: Set taint to current node
+  shell: |
+    kubectl taint nodes {{ ansible_hostname }} {{ item }}
+  with_items: "{{ node_taint }}"

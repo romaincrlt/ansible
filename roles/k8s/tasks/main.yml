@@ -23,3 +23,6 @@
 - name: Join nodes
   import_tasks: join_nodes.yml
   #when: inventory_hostname == groups["kube_node"][0]
+
+- name: Set taint to current node
+  import_tasks: node_taint.yml
