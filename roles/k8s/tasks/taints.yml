@@ -1,0 +1,15 @@
+---
+- name: Get current taints on the node
+  command: kubectl get node {{ ansible_hostname }} -o jsonpath='{.spec.taints[*].key}'
+  register: current_taints
+  changed_when: false
+
+- name: Add taints to current node if not already present
+  command: "kubectl taint nodes {{ ansible_hostname }} {{ item }}"
+  with_items: "{{ taints_to_add }}"
+  when: item.split('=')[0] not in current_taints.stdout.split()
+
+- name: Remove taints from current node if present
+  command: "kubectl taint nodes {{ ansible_hostname }} {{ item }}-"
+  with_items: "{{ taints_to_remove }}"
+  when: item in current_taints.stdout.split() # Check only the key part
