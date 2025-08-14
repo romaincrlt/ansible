@@ -1,24 +1,17 @@
 ---
-- name: check if calico manifest is present
-  stat:
-    path: "./calico.yaml"
-    get_attributes: no
-    get_checksum: no
-    get_mime: no
-  register: calico_manifests
+- name: Check if Calico deployment exists
+  command: "kubectl get deployments -n kube-system calico-kube-controllers"
+  register: is_calico_controller_exists
+  ignore_errors: true
+  changed_when: false
 
-- name: download calico manifest
-  get_url:
-    url: "{{ calico_url }}"
-    dest: ./calico.yaml
-    mode: "0440"
-  when: not calico_manifests.stat.exists
+- when: is_calico_controller_exists.rc != 0
+  block:
+    - name: Download calico manifest for the specified version
+      get_url:
+        url: "{{ calico_url }}"
+        dest: ~/calico-manifest.yaml
+        mode: "0440"
 
-# chek if callico is already applied
-- name: apply pod network
-  #k8s: # necessite some others components
-  #  src: ./calico.yaml
-  #  state: present
-  #  apply: true
-  shell: kubectl apply -f calico.yaml
-  #when:
+    - name: Apply Calico pod network
+      command: "kubectl apply -f ~/calico-manifest.yaml"
