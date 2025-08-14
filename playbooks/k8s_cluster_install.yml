@@ -11,3 +11,4 @@
     - role: common
     #- role: automatic_updates
     - role: k8s
+    - role: k8s_addons

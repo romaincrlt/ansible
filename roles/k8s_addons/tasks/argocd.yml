@@ -1,0 +1,47 @@
+---
+- name: Check if argocd namespace exists
+  command: "kubectl get ns {{ argocd_namespace }}"
+  register: is_argocd_ns_exists
+  ignore_errors: true
+  changed_when: false
+
+- name: Create argocd namespace
+  command: "kubectl create ns {{ argocd_namespace }}"
+  when: is_argocd_ns_exists.rc != 0
+
+- name: Check if pods exists in argocd namespace
+  command: "kubectl get pods -n {{ argocd_namespace }}"
+  register: is_argocd_pods_exists
+  ignore_errors: true
+  changed_when: false
+
+- when: is_argocd_pods_exists.rc != 0
+  block:
+    - name: Download argocd manifest
+      get_url:
+        dest: ~/argocd-manifest.yaml
+        mode: "0644"
+        url: "{{ argocd_manifest_url }}"
+
+    - name: Apply argocd manifest
+      command: "kubectl apply -n {{ argocd_namespace }} -f ~/argocd-manifest.yaml"
+#
+# If using the kubernetes.core.k8s ansible collection and kubernetes python library
+#  - name: create argocd namespace
+#   kubernetes.core.k8s:
+#     api_version: 1
+#     kind: namespace
+#     name: "{{ argocd_namespace }}"
+#     state: present
+
+# - name: download argocd manifetst
+#   get_url:
+#     dest: ~/argocd-manifest.yaml
+#     mode: "0644"
+#     url: "{{ argocd_manifest_url }}"
+
+# - name: apply argocd manifest
+#   kubernetes.core.k8s:
+#     namespace: "{{ argocd_namespace }}"
+#     src: ~/argocd-manifest.yaml
+#     state: present

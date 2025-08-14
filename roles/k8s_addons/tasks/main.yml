@@ -1,0 +1,4 @@
+---
+- name: Add ArgoCD components to k8s cluster
+  import_tasks: argocd.yml
+  when: argocd_version | length > 0
