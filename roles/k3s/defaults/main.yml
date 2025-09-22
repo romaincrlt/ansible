@@ -1,0 +1,6 @@
+---
+k3s_upgrade_if_necessary: true
+
+k3s_kubeconfig_mode: "0644"
+k3s_components_to_disable: []
+  #- traefik

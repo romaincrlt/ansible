@@ -3,14 +3,38 @@
   ansible.builtin.get_url:
     url: https://get.k3s.io/
     timeout: 120
-    dest: /tmp/k3s-install.sh
+    dest: "/home/{{ ansible_user }}/k3s-install.sh"
     mode: "0755"
+  register: download_k3s_script
+
+- name: Create k3s config file
+  become: true
+  ansible.builtin.template:
+    src: templates/k3s-config.yaml.j2
+    dest: /etc/rancher/k3s/config.yaml
+    owner: "root"
+    mode: 0644
+  register: edit_k3s_config_file
 
 - name: Execute K3s install script
   become: true
   ansible.builtin.command:
-    cmd: /tmp/k3s-install.sh
+    cmd: "/home/{{ ansible_user }}/k3s-install.sh"
     creates: "/etc/rancher/k3s/k3s.yaml"
   #environment:
   #  INSTALL_K3S_SKIP_START: "true"
   #  INSTALL_K3S_VERSION: "{{ k3s_version }}"
+
+- name: Upgrade K3s
+  become: true
+  when: download_k3s_script.changed and k3s_upgrade_if_necessary == true
+  ansible.builtin.command:
+    cmd: "/home/{{ ansible_user }}/k3s-install.sh"
+
+- name: Restart K3s service
+  become: true
+  when: edit_k3s_config_file.changed
+  ansible.builtin.systemd_service:
+    name: k3s.service
+    scope: system
+    state: restarted
