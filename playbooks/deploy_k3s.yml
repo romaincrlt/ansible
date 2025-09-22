@@ -1,0 +1,12 @@
+---
+- name: Prep OS
+  hosts: all
+  vars:
+    disable_firewall: true
+  roles:
+    - role: common
+
+- name: Deploy k3s
+  hosts: all
+  roles:
+    - role: k3s
