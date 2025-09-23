@@ -1,2 +1,4 @@
 write-kubeconfig-mode: "{{ k3s_kubeconfig_mode }}"
-disable: {{ k3s_components_to_disable }}
+{% if k3s_components_to_disable|length >= 1 %}
+    disable: {{ k3s_components_to_disable }}
+{% endif %}
