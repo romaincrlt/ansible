@@ -7,6 +7,13 @@
     mode: "0755"
   register: download_k3s_script
 
+- name: Ensure k3s directory exist
+  become: true
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    mode: "0755"
+
 - name: Create k3s config file
   become: true
   ansible.builtin.template:
