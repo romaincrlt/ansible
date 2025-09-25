@@ -1,0 +1,8 @@
+---
+- name: Add Traefik config to enable GatewayAPI
+  become: true
+  copy:
+    src: "files/traefik-config.yaml"
+    dest: "/var/lib/rancher/k3s/server/manifests/traefik-config.yaml"
+    owner: "root"
+    mode: "0600"

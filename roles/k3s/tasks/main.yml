@@ -43,3 +43,7 @@
     name: k3s.service
     scope: system
     state: restarted
+
+- name: Enable Gateway API
+  import_tasks: enable_gateway_api.yml
+  when: k3s_enable_gateway_api
