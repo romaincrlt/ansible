@@ -28,19 +28,17 @@
   ansible.builtin.command:
     cmd: "/home/{{ ansible_user }}/k3s-install.sh"
     creates: "/etc/rancher/k3s/k3s.yaml"
-  #environment:
-  #  INSTALL_K3S_SKIP_START: "true"
-  #  INSTALL_K3S_VERSION: "{{ k3s_version }}"
+  register: k3s_first_install
 
 - name: Upgrade K3s
   become: true
-  when: download_k3s_script.changed and k3s_upgrade_if_necessary == true
+  when: download_k3s_script.changed and k3s_upgrade_if_necessary == true and not k3s_first_install.changed
   ansible.builtin.command:
     cmd: "/home/{{ ansible_user }}/k3s-install.sh"
 
 - name: Restart K3s service
   become: true
-  when: edit_k3s_config_file.changed
+  when: edit_k3s_config_file.changed and not k3s_first_install.changed
   ansible.builtin.systemd_service:
     name: k3s.service
     scope: system
