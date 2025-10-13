@@ -1,4 +1,8 @@
 ---
+- name: Set Timezone
+  import_tasks: set_timezone.yml
+  when: timezone | length > 0
+
 - name: Install packages
   import_tasks: install_packages.yml
 

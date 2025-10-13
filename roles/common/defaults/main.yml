@@ -3,6 +3,8 @@ packages_to_install: []
 
 disable_firewall: false
 
+timezone: "UTC"
+
 update_all_packages: false
 
 drives_to_mount: []

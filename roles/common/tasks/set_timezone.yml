@@ -1,0 +1,24 @@
+---
+- name: Set timezone
+  become: true
+  community.general.timezone:
+    name: "{{ timezone }}"
+  register: task_timezone
+
+- name: Restart crond (RedHat)
+  become: true
+  ansible.builtin.systemd:
+    name: "crond.service"
+    scope: system
+    state: restarted
+    daemon_reload: true
+  when: ansible_facts['os_family'] == "RedHat" and task_timezone.changed
+
+- name: Restart crond (Debian)
+  become: true
+  ansible.builtin.systemd:
+    name: "cron.service"
+    scope: system
+    state: restarted
+    daemon_reload: true
+  when: ansible_facts['os_family'] == "Debian" and task_timezone.changed
