@@ -6,9 +6,19 @@
       - curl
       - rsync
       - vim
-    enable_podman_restart_service: true
-    enable_podman_socket: true
+    #enable_podman_restart_service: true
+    #enable_podman_socket: true
   roles:
     - role: common
     - role: automatic_updates
     - role: podman
+
+- name: Deploy containers
+  hosts: all
+  tasks:
+    - name: Deploy containers from containers_list (declared in inventory)
+      include_role:
+        name: podman_container_systemd
+      loop: "{{ containers_list }}"
+      vars:
+        container_config: "{{ item.container_config }}"
