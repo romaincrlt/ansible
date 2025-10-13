@@ -6,7 +6,7 @@
     state: present
 
 - name: Ensure {{ container_config.name }} container is configure (quadlet)
-  when: ansible_facts['os_family'] == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat" or (ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] is version("13", ">="))
   notify: Restart service
   containers.podman.podman_container:
     name: "{{ container_config.name }}"
@@ -25,7 +25,7 @@
     env: "{{ container_config.env | default(omit) }}"
 
 - name: Ensure {{ container_config.name }} container is configure (old systemd version)
-  when: ansible_facts['os_family'] == "Debian"
+  when: ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] is version("12", "<=")
   notify: Restart service
   block:
     - name: Create container
